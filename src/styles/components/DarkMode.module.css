@@ -1,0 +1,20 @@
+.toggleButton {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  margin: var(--toggle-position);
+  outline: 0;
+  background: var(--dark-mode-button);
+  transition: 0.2s;
+}
+
+.toggleContainer {
+  background: var(--dark-mode-button-background);
+  width: 60px;
+  height: 32px;
+  border-radius: 40px;
+  border: none;
+  margin: 0 10px 10px auto;
+  outline: 0;
+  transition: 0.2s;
+}

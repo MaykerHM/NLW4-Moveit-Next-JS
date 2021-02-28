@@ -16,6 +16,10 @@
   --blue: #5965e0;
   --blue-dark: #4953b8;
   --blue-twitter: #2aa9e0;
+  --right-border: #f2f3f5;
+  --dark-mode-button: #8257e6;
+  --dark-mode-button-background: #b59fea;
+  --toggle-position: 0 auto 0 0;
 }
 
 @media (max-width: 1080px) {
