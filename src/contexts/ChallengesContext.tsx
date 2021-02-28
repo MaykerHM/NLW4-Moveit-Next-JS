@@ -1,7 +1,8 @@
-import { createContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useState, ReactNode, useEffect, FormEvent, } from 'react'
 import Cookies from 'js-cookie'
 import challenges from '../../challenges.json'
 import { LevelUpModal } from '../components/LevelUpModal'
+import axios from 'axios'
 
 interface Challenge {
   type: 'body' | 'eye'
@@ -10,6 +11,8 @@ interface Challenge {
 }
 
 interface ChallengesContextData {
+  github: string
+  loggedIn: boolean
   level: number
   currentExperience: number
   experienceToNextLevel: number
@@ -20,6 +23,8 @@ interface ChallengesContextData {
   resetChallenge: () => void
   completeChallenge: () => void
   closeLevelUpModal: () => void
+  handleLoginGithub: (event: FormEvent) => void
+  loginGithub: (login: string) => void
 }
 
 interface ChallengesProviderProps {
@@ -35,6 +40,9 @@ export function ChallengesProvider({
   children,
   ...rest
 }: ChallengesProviderProps) {
+  const [github, setGithub] = useState('')
+  const [loggedIn, setloggedIn] = useState(false)
+
   const [level, setlevel] = useState(rest.level ?? 1)
   const [currentExperience, setCurrentExperience] = useState(rest.currentExperience ?? 0)
   const [challengesCompleted, setChallengesCompleted] = useState(rest.challengesCompleted ?? 0)
@@ -49,10 +57,26 @@ export function ChallengesProvider({
   }, [])
 
   useEffect(() => {
-    Cookies.set('level', String(level))
-    Cookies.set('currentExperience', String(currentExperience))
-    Cookies.set('challengesCompleted', String(challengesCompleted))
-  }, [level, currentExperience, challengesCompleted])
+    axios.get(`/api/${github}`).then(response => response.data).then(data => {
+      setCurrentExperience(data.currentExperience)
+      setChallengesCompleted(data.challengesCompleted)
+      setlevel(data.level)
+    }).catch(error => console.log(error))
+
+    axios.put(`api/${github}`, { level, currentExperience, challengesCompleted }).catch(error => console.log(error))
+  }, [currentExperience])
+
+  function handleLoginGithub(event: FormEvent) {
+    event.preventDefault()
+    axios.post('/api/login', { github }).catch(error => console.log(error))
+    setloggedIn(true)
+  }
+
+  function loginGithub(login: string) {
+    setGithub(login)
+  }
+
+  // -----------------------------------------------------------------------------
 
   function levelUp() {
     setlevel(level + 1)
@@ -104,6 +128,8 @@ export function ChallengesProvider({
   return (
     <ChallengesContext.Provider
       value={ {
+        github,
+        loggedIn,
         level,
         currentExperience,
         experienceToNextLevel,
@@ -114,6 +140,8 @@ export function ChallengesProvider({
         resetChallenge,
         completeChallenge,
         closeLevelUpModal,
+        handleLoginGithub,
+        loginGithub
       } }
     >
       { children }

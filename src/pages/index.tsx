@@ -9,7 +9,9 @@ import { ChallengeBox } from "../components/ChallengeBox";
 
 import styles from '../styles/pages/Home.module.css'
 import { CountdownProvider } from '../contexts/CountdownContext';
-import { ChallengesProvider } from '../contexts/ChallengesContext';
+import { ChallengesContext, ChallengesProvider } from '../contexts/ChallengesContext';
+import axios from 'axios'
+import { FormEvent, useContext, useEffect, useState } from 'react';
 
 interface HomeProps {
   level: number
@@ -18,45 +20,47 @@ interface HomeProps {
 }
 
 export default function Home(props: HomeProps) {
+
+  const { loggedIn, github, loginGithub, handleLoginGithub } = useContext(ChallengesContext)
+
+
   return (
-    <ChallengesProvider
-      level={ props.level }
-      currentExperience={ props.currentExperience }
-      challengesCompleted={ props.challengesCompleted }
-    >
-      <div className={ styles.container }>
-        <Head>
-          <title>Inicio | move.it</title>
-        </Head>
+    <>
+      <ChallengesProvider
+        level={ props.level }
+        currentExperience={ props.currentExperience }
+        challengesCompleted={ props.challengesCompleted }
+      >
+        { loggedIn ?
+          (
+            <div className={ styles.container }>
+              <Head>
+                <title>Inicio | move.it</title>
+              </Head>
 
-        <ExperienceBar />
+              <ExperienceBar />
 
-        <CountdownProvider>
-          <section>
-            <div>
-              <Profile />
-              <CompletedChallenges />
-              <Countdown />
+              <CountdownProvider>
+                <section>
+                  <div>
+                    <Profile />
+                    <CompletedChallenges />
+                    <Countdown />
+                  </div>
+                  <div>
+                    <ChallengeBox />
+                  </div>
+                </section>
+              </CountdownProvider>
             </div>
-            <div>
-              <ChallengeBox />
-            </div>
-          </section>
-        </CountdownProvider>
-      </div>
-    </ChallengesProvider>
+          ) : (
+            <form className={ styles.container } onSubmit={ handleLoginGithub }>
+              <label htmlFor="github">Github</label>
+              <input type="text" name="github" value={ github } onChange={ e => loginGithub(e.target.value) } />
+              <button type="submit">Login</button>
+            </form>
+          ) }
+      </ChallengesProvider>
+    </>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-
-  const { level, currentExperience, challengesCompleted } = ctx.req.cookies
-
-  return {
-    props: {
-      level: Number(level),
-      currentExperience: Number(currentExperience),
-      challengesCompleted: Number(challengesCompleted)
-    }
-  }
 }
